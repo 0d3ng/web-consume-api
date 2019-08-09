@@ -62,9 +62,8 @@
                         </div>
                     </div>
                 </form>
-                |
-                <form method="get" th:action="@{/mahasiswa/detail_form(id=${mhs.id})}" class="d-inline">
-                    <button type="submit" name="id" th:value="${mhs.id}" class="btn btn-link btn-sm">Detail</button>
+                <form method="get" th:action="@{${'/mahasiswa/detail_form/'+mhs.id}}" class="d-inline">
+                    <button type="submit" class="btn btn-link btn-sm">Detail</button>
                 </form>
             </td>
         </tr>

@@ -10,7 +10,7 @@
  * Hp      : 085878554150
  */
 
-package com.sinaungoding.web.consumeapi.entity;
+package com.sinaungoding.web.consumeapi.dto;
 
 import lombok.Data;
 
