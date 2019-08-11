@@ -31,8 +31,8 @@
             <td th:text="${mhs.ipk}">&nbsp;</td>
             <td th:text="${mhs.jurusan}">&nbsp;</td>
             <td>
-                <form method="get" th:action="@{/mahasiswa/form}" class="d-inline">
-                    <button type="submit" name="id" th:value="${mhs.id}" class="btn btn-link btn-sm">Edit</button>
+                <form method="get" th:action="@{'/mahasiswa/form/'+${mhs.id}}" class="d-inline">
+                    <button type="submit" class="btn btn-link btn-sm">Edit</button>
                 </form>
                 |
                 <form method="post" th:action="@{/mahasiswa/hapus(id=${mhs.id})}" class="d-inline">
@@ -62,7 +62,8 @@
                         </div>
                     </div>
                 </form>
-                <form method="get" th:action="@{${'/mahasiswa/detail_form/'+mhs.id}}" class="d-inline">
+                |
+                <form method="get" th:action="@{'/mahasiswa/detail_form/'+${mhs.id}}" class="d-inline">
                     <button type="submit" class="btn btn-link btn-sm">Detail</button>
                 </form>
             </td>

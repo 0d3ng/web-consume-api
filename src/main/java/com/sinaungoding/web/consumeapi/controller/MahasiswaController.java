@@ -2,60 +2,72 @@ package com.sinaungoding.web.consumeapi.controller;
 
 import com.sinaungoding.web.consumeapi.dto.Mahasiswa;
 import com.sinaungoding.web.consumeapi.service.MahasiswaRestClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Controller
+@Slf4j
 public class MahasiswaController {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(MahasiswaController.class.getName());
 
     @Autowired
     private MahasiswaRestClient mahasiswaRestClient;
 
-    @GetMapping("/index")
-    public ModelMap getAll(HttpServletRequest request) {
-        return new ModelMap().addAttribute("mahasiswas", mahasiswaRestClient.getMahasiswas(request.getQueryString()));
+    @GetMapping("/")
+    public String getAll(HttpServletRequest request, ModelMap modelMap) {
+        modelMap.addAttribute("mahasiswas", mahasiswaRestClient.getMahasiswas(request.getQueryString()));
+        return "/index";
     }
 
-    @GetMapping("/")
-    public String index() {
-        return "redirect:/index";
+    @GetMapping("/index")
+    public String toIndex() {
+        return "redirect:/";
     }
 
     @GetMapping("/mahasiswa/form/{id}")
-    public ModelMap tampilFormedit(@PathVariable(name = "id") String id) {
-        return new ModelMap().addAttribute("mahasiswa", mahasiswaRestClient.getMahasiswa(id));
+    public String tampilFormedit(@PathVariable(name = "id") String id, ModelMap modelMap) {
+        modelMap.addAttribute("mahasiswa", mahasiswaRestClient.getMahasiswa(id));
+        return "/mahasiswa/form";
+    }
+
+    @GetMapping("/mahasiswa/form")
+    public void tampilFormTambah(ModelMap modelMap) {
+        modelMap.addAttribute("mahasiswa", new Mahasiswa());
     }
 
     @PostMapping("/mahasiswa/form")
     public String editMahasiswa(@ModelAttribute @Valid Mahasiswa mahasiswa, BindingResult errors, SessionStatus status) {
-        LOGGER.info(mahasiswa.toString());
-        LOGGER.info(errors.toString());
-        LOGGER.info("" + errors.hasErrors());
-        LOGGER.info("" + errors.hasGlobalErrors());
-        if (mahasiswaRestClient.insert(mahasiswa)) {
+        log.info(mahasiswa.toString());
+        log.info(errors.toString());
+        log.info("" + errors.hasErrors());
+        log.info("" + errors.hasGlobalErrors());
+        try {
+            mahasiswaRestClient.insert(mahasiswa);
             status.setComplete();
-            return "redirect:/index";
-        } else {
-            return "/mahasiswa/form";
+            return "redirect:/";
+        } catch (HttpStatusCodeException e) {
+            ResponseEntity<String> response = ResponseEntity.status(e.getStatusCode()).headers(e.getResponseHeaders()).body(e.getResponseBodyAsString());
+            log.error(response.getBody());
+            log.error("" + response.getStatusCodeValue());
+            errors.reject("error.object", response.getBody());
         }
+        return "/mahasiswa/form";
     }
 
     @GetMapping("/mahasiswa/detail_form/{id}")
-    public ModelMap tampilFormDetail(@PathVariable(name = "id") String id) {
-        return new ModelMap().addAttribute("mahasiswa", mahasiswaRestClient.getMahasiswa(id));
+    public String tampilFormDetail(@PathVariable String id, ModelMap modelMap) {
+        modelMap.addAttribute("mahasiswa", mahasiswaRestClient.getMahasiswa(id));
+        return "/mahasiswa/detail_form";
     }
 
     @DeleteMapping("/mahasiswa/hapus")
